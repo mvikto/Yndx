@@ -164,7 +164,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public string StatusMessage
     {
         get => _statusMessage;
-        private set => SetField(ref _statusMessage, value);
+        set => SetField(ref _statusMessage, value);
     }
 
     public string AccountDisplay

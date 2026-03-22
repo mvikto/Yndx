@@ -1,7 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
+using Avalonia.Input;
+using Avalonia.Controls.ApplicationLifetimes;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
 
 using Yndx.Models;
 using Yndx.Services;
@@ -65,6 +70,143 @@ public partial class MainWindow : Window
         {
             await ViewModel.QueueTrackEntryAsync(track);
         }
+    }
+
+    private void OpenQueueItem_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (TryGetQueueItem(sender) is not { CanOpenFile: true } item)
+        {
+            return;
+        }
+
+        try
+        {
+            OpenPath(item.TargetPath);
+        }
+        catch (Exception ex)
+        {
+            ViewModel.StatusMessage = ex.Message;
+        }
+    }
+
+    private void QueueItem_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        if ((sender as StyledElement)?.DataContext is not { } dataContext || dataContext is not DownloadQueueItem item || !item.CanOpenFile)
+        {
+            return;
+        }
+
+        try
+        {
+            OpenPath(item.TargetPath);
+        }
+        catch (Exception ex)
+        {
+            ViewModel.StatusMessage = ex.Message;
+        }
+    }
+
+    private void OpenWithQueueItem_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (TryGetQueueItem(sender) is not { CanOpenFile: true } item)
+        {
+            return;
+        }
+
+        try
+        {
+            OpenWithPath(item.TargetPath);
+        }
+        catch (Exception ex)
+        {
+            ViewModel.StatusMessage = ex.Message;
+        }
+    }
+
+    private void OpenQueueFolder_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (TryGetQueueItem(sender) is not { CanOpenFile: true } item)
+        {
+            return;
+        }
+
+        try
+        {
+            OpenContainingFolder(item.TargetPath);
+        }
+        catch (Exception ex)
+        {
+            ViewModel.StatusMessage = ex.Message;
+        }
+    }
+
+    private static DownloadQueueItem? TryGetQueueItem(object? sender)
+    {
+        if (sender is MenuItem { CommandParameter: DownloadQueueItem item })
+        {
+            return item;
+        }
+
+        return (sender as Control)?.DataContext as DownloadQueueItem;
+    }
+
+    private void OpenPath(string path)
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = path,
+            UseShellExecute = true
+        });
+    }
+
+    private void OpenWithPath(string path)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "rundll32.exe",
+                Arguments = $"shell32.dll,OpenAs_RunDLL \"{path}\"",
+                UseShellExecute = true
+            });
+            return;
+        }
+
+        OpenPath(path);
+        ViewModel.StatusMessage = _localization["StatusOpenWithFallback"];
+    }
+
+    private static void OpenContainingFolder(string path)
+    {
+        var directory = Path.GetDirectoryName(path);
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            throw new InvalidOperationException("Folder path was not resolved.");
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{path}\"",
+                UseShellExecute = true
+            });
+            return;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Process.Start("open", $"-R \"{path}\"");
+            return;
+        }
+
+        Process.Start("xdg-open", $"\"{directory}\"");
     }
 
     private async Task PromptForTokenChoiceAsync()

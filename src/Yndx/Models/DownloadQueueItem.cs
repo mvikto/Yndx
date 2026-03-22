@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 
 using Yandex.Music.Api.Models.Track;
@@ -46,7 +47,19 @@ public sealed class DownloadQueueItem : INotifyPropertyChanged
 
     public string DisplayPath => string.IsNullOrWhiteSpace(TargetPath) ? FolderHint : TargetPath;
 
+    public string DisplayName => string.IsNullOrWhiteSpace(TargetPath)
+        ? Title
+        : Path.GetFileName(TargetPath);
+
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
+
+    public bool CanOpenFile => Status == DownloadStatus.Done && !string.IsNullOrWhiteSpace(TargetPath) && File.Exists(TargetPath);
+
+    public string OpenFileLabel => LocalizationService.Instance["ResultOpen"];
+
+    public string OpenWithLabel => LocalizationService.Instance["OpenWith"];
+
+    public string OpenFolderLabel => LocalizationService.Instance["OpenFolder"];
 
     public string StatusText => Status switch
     {
@@ -79,6 +92,8 @@ public sealed class DownloadQueueItem : INotifyPropertyChanged
         if (propertyName is nameof(TargetPath))
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayPath)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CanOpenFile)));
         }
 
         if (propertyName is nameof(Error))
@@ -90,6 +105,7 @@ public sealed class DownloadQueueItem : INotifyPropertyChanged
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusBrush)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CanOpenFile)));
         }
     }
 
@@ -98,6 +114,9 @@ public sealed class DownloadQueueItem : INotifyPropertyChanged
         if (e.PropertyName is nameof(LocalizationService.CurrentLanguage) or "Item[]")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OpenFileLabel)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OpenWithLabel)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OpenFolderLabel)));
         }
     }
 }

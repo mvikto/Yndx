@@ -181,17 +181,46 @@
                 <ItemsControl ItemsSource="{Binding Queue}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:DownloadQueueItem">
-                      <Border Classes="soft-card" Margin="0,0,0,10">
-                        <StackPanel Spacing="4">
-                          <TextBlock Classes="result-title" Text="{Binding Title}" />
-                          <TextBlock Classes="subtle-text" Text="{Binding Subtitle}" />
-                          <TextBlock FontWeight="SemiBold" Foreground="{Binding StatusBrush}" Text="{Binding StatusText}" />
-                          <TextBlock Classes="body-text" Text="{Binding DisplayPath}" />
-                          <TextBlock Foreground="#B42318"
+                      <Border Classes="soft-card"
+                              Margin="0,0,0,10"
+                              PointerPressed="QueueItem_OnPointerPressed">
+                        <Border.ContextMenu>
+                          <ContextMenu>
+                            <MenuItem Header="{Binding OpenFileLabel}"
+                                      CommandParameter="{Binding}"
+                                      IsEnabled="{Binding CanOpenFile}"
+                                      Click="OpenQueueItem_OnClick" />
+                            <MenuItem Header="{Binding OpenWithLabel}"
+                                      CommandParameter="{Binding}"
+                                      IsEnabled="{Binding CanOpenFile}"
+                                      Click="OpenWithQueueItem_OnClick" />
+                            <MenuItem Header="{Binding OpenFolderLabel}"
+                                      CommandParameter="{Binding}"
+                                      IsEnabled="{Binding CanOpenFile}"
+                                      Click="OpenQueueFolder_OnClick" />
+                          </ContextMenu>
+                        </Border.ContextMenu>
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                          <TextBlock Grid.Column="0"
+                                     Classes="result-title"
+                                     Text="{Binding DisplayName}"
+                                     TextTrimming="CharacterEllipsis"
+                                     VerticalAlignment="Center" />
+                          <TextBlock Grid.Column="1"
+                                     FontWeight="SemiBold"
+                                     Foreground="{Binding StatusBrush}"
+                                     Text="{Binding StatusText}"
+                                     VerticalAlignment="Center"
+                                      Margin="12,0,0,0" />
+                          <TextBlock Grid.Row="1"
+                                     Grid.Column="0"
+                                     Grid.ColumnSpan="2"
+                                     Foreground="#B42318"
                                      TextWrapping="Wrap"
                                      IsVisible="{Binding HasError}"
-                                     Text="{Binding Error}" />
-                        </StackPanel>
+                                     Text="{Binding Error}"
+                                     Margin="0,6,0,0" />
+                        </Grid>
                       </Border>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>

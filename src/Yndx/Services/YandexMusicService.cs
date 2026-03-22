@@ -43,6 +43,13 @@ public sealed class YandexMusicService
     {
         EnsureAuthorized();
 
+        var playlistUuid = TryExtractPlaylistUuid(query);
+        if (!string.IsNullOrWhiteSpace(playlistUuid))
+        {
+            var playlist = (await _api.Playlist.GetAsync(_storage, playlistUuid)).Result;
+            return [ToPlaylistSearchResult(playlist)];
+        }
+
         YResponse<YSearch> response = scope switch
         {
             SearchScope.Track => await _api.Search.TrackAsync(_storage, query),
@@ -78,7 +85,7 @@ public sealed class YandexMusicService
             SearchScope.PodcastEpisode => await BuildTrackDetailAsync((YSearchTrackModel)item.RawItem, true),
             SearchScope.Album => await BuildAlbumDetailAsync((YSearchAlbumModel)item.RawItem),
             SearchScope.Artist => await BuildArtistDetailAsync((YSearchArtistModel)item.RawItem),
-            SearchScope.Playlist => await BuildPlaylistDetailAsync((YSearchPlaylistModel)item.RawItem),
+            SearchScope.Playlist => await BuildPlaylistDetailAsync(item.RawItem),
             SearchScope.Video => BuildVideoDetail((YSearchVideoModel)item.RawItem),
             SearchScope.User => BuildUserDetail((YSearchUserModel)item.RawItem),
             _ => throw new ArgumentOutOfRangeException(nameof(item.Kind), item.Kind, null)
@@ -166,6 +173,24 @@ public sealed class YandexMusicService
         };
     }
 
+    private SearchResultItem ToPlaylistSearchResult(YPlaylist playlist)
+    {
+        var owner = playlist.Owner?.Name ?? playlist.Owner?.Login ?? playlist.Owner?.Uid ?? T("YandexPlaylistFallback");
+        var trackCount = playlist.TrackCount > 0
+            ? playlist.TrackCount
+            : playlist.Tracks?.Count ?? 0;
+
+        return new SearchResultItem
+        {
+            Kind = SearchScope.Playlist,
+            Title = playlist.Title,
+            Subtitle = owner,
+            Description = _localization.Format("YandexPlaylistTrackCount", trackCount),
+            CanDownload = true,
+            RawItem = playlist
+        };
+    }
+
     private SearchResultItem ToVideoSearchResult(YSearchVideoModel video)
     {
         return new SearchResultItem
@@ -245,22 +270,14 @@ public sealed class YandexMusicService
         };
     }
 
-    private async Task<EntityDetail> BuildPlaylistDetailAsync(YSearchPlaylistModel searchPlaylist)
+    private async Task<EntityDetail> BuildPlaylistDetailAsync(object playlistSource)
     {
-        YPlaylist playlist;
-
-        if (!string.IsNullOrWhiteSpace(searchPlaylist.Owner?.Uid) && !string.IsNullOrWhiteSpace(searchPlaylist.Kind))
+        var playlist = playlistSource switch
         {
-            playlist = (await _api.Playlist.GetAsync(_storage, searchPlaylist.Owner.Uid, searchPlaylist.Kind)).Result;
-        }
-        else if (!string.IsNullOrWhiteSpace(searchPlaylist.PlaylistUuid))
-        {
-            playlist = (await _api.Playlist.GetAsync(_storage, searchPlaylist.PlaylistUuid)).Result;
-        }
-        else
-        {
-            throw new InvalidOperationException(T("YandexPlaylistIdentifiersMissing"));
-        }
+            YSearchPlaylistModel searchPlaylist => await ResolvePlaylistAsync(searchPlaylist),
+            YPlaylist directPlaylist => directPlaylist,
+            _ => throw new InvalidOperationException(T("YandexPlaylistIdentifiersMissing"))
+        };
 
         var tracks = playlist.Tracks?
             .Select(container => container.Track)
@@ -280,6 +297,49 @@ public sealed class YandexMusicService
             IsBrowseOnly = false,
             Tracks = tracks.Select(ToTrackEntry).ToList()
         };
+    }
+
+    private async Task<YPlaylist> ResolvePlaylistAsync(YSearchPlaylistModel searchPlaylist)
+    {
+        if (!string.IsNullOrWhiteSpace(searchPlaylist.Owner?.Uid) && !string.IsNullOrWhiteSpace(searchPlaylist.Kind))
+        {
+            return (await _api.Playlist.GetAsync(_storage, searchPlaylist.Owner.Uid, searchPlaylist.Kind)).Result;
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchPlaylist.PlaylistUuid))
+        {
+            return (await _api.Playlist.GetAsync(_storage, searchPlaylist.PlaylistUuid)).Result;
+        }
+
+        throw new InvalidOperationException(T("YandexPlaylistIdentifiersMissing"));
+    }
+
+    private static string? TryExtractPlaylistUuid(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return null;
+        }
+
+        const string marker = "/playlists/";
+        var trimmed = query.Trim();
+        var markerIndex = trimmed.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (markerIndex < 0)
+        {
+            return null;
+        }
+
+        var startIndex = markerIndex + marker.Length;
+        if (startIndex >= trimmed.Length)
+        {
+            return null;
+        }
+
+        var remainder = trimmed[startIndex..];
+        var endIndex = remainder.IndexOfAny(['/', '?', '#']);
+        var candidate = (endIndex >= 0 ? remainder[..endIndex] : remainder).Trim();
+
+        return Guid.TryParse(candidate, out _) ? candidate : null;
     }
 
     private EntityDetail BuildVideoDetail(YSearchVideoModel video)

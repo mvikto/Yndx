@@ -26,6 +26,8 @@
   <data name="LanguageRussian" xml:space="preserve"><value>Русский</value></data>
   <data name="MainWindowTitle" xml:space="preserve"><value>Yndx Music Browser</value></data>
   <data name="NoteBrowseOnly" xml:space="preserve"><value>Пользователи и видео доступны только для просмотра. Альбомы, плейлисты, артисты, треки и эпизоды подкастов превращаются в скачиваемые треки.</value></data>
+  <data name="OpenFolder" xml:space="preserve"><value>Открыть папку</value></data>
+  <data name="OpenWith" xml:space="preserve"><value>Открыть через</value></data>
   <data name="QueueAdded" xml:space="preserve"><value>Элементы добавлены в очередь загрузки.</value></data>
   <data name="QueueRunHint" xml:space="preserve"><value>Загрузки идут по очереди, чтобы поведение оставалось предсказуемым.</value></data>
   <data name="QueueSectionTitle" xml:space="preserve"><value>Очередь</value></data>
@@ -51,7 +53,7 @@
   <data name="ScopeUser" xml:space="preserve"><value>Пользователи</value></data>
   <data name="ScopeVideo" xml:space="preserve"><value>Видео</value></data>
   <data name="SearchButton" xml:space="preserve"><value>Искать</value></data>
-  <data name="SearchPlaceholder" xml:space="preserve"><value>Искать треки, альбомы, артистов, плейлисты, подкасты, видео, пользователей</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Искать треки, альбомы, артистов, плейлисты, подкасты, видео, пользователей или вставить ссылку на плейлист</value></data>
   <data name="SessionHint" xml:space="preserve"><value>Токен нужен при запуске, затем он скрыт, пока вы сами не решите его заменить.</value></data>
   <data name="SessionSectionTitle" xml:space="preserve"><value>Сессия</value></data>
   <data name="SetToken" xml:space="preserve"><value>Установить токен</value></data>
@@ -66,6 +68,7 @@
   <data name="StatusLoadedDetails" xml:space="preserve"><value>Загружены детали для {0}.</value></data>
   <data name="StatusNoResults" xml:space="preserve"><value>Результаты для категории "{0}" не найдены.</value></data>
   <data name="StatusNotConnected" xml:space="preserve"><value>Нет подключения</value></data>
+  <data name="StatusOpenWithFallback" xml:space="preserve"><value>Выбор приложения доступен только в Windows, поэтому файл был открыт обычным способом.</value></data>
   <data name="StatusResultsLoaded" xml:space="preserve"><value>Загружено результатов: {0}.</value></data>
   <data name="StatusSearchPrompt" xml:space="preserve"><value>Введите что-нибудь для поиска.</value></data>
   <data name="TokenPromptBody" xml:space="preserve"><value>Приложению нужен токен перед поиском и скачиванием. Токен сохраняется локально в открытом виде, как вы и просили ранее.</value></data>
