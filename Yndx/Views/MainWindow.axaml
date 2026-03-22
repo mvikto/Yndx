@@ -8,7 +8,7 @@
         x:DataType="vm:MainViewModel"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="Yndx Music Browser"
+        Title="{Binding MainWindowTitle}"
         Width="1440"
         Height="920"
         MinWidth="1100"
@@ -82,15 +82,18 @@
     <StackPanel Grid.Column="0" Spacing="16">
       <Border Classes="card">
         <StackPanel Spacing="12">
-          <TextBlock Classes="section-title" Text="Session" />
-          <TextBlock Classes="muted-text"
-                     Text="A token is required at startup, then it stays hidden unless you choose to replace it." />
+          <TextBlock Classes="section-title" Text="{Binding SessionSectionTitle}" />
+          <TextBlock Classes="muted-text" Text="{Binding SessionHint}" />
           <TextBlock FontSize="18"
                      FontWeight="SemiBold"
                      Foreground="#14383B"
                      Text="{Binding AccountDisplay}" />
+          <TextBlock Classes="body-text" Text="{Binding LanguageLabel}" />
+          <ComboBox ItemsSource="{Binding LanguageOptions}"
+                    SelectedItem="{Binding SelectedLanguageOption, Mode=TwoWay}"
+                    MinHeight="36" />
           <TextBox Text="{Binding DownloadFolder}"
-                   Watermark="Download folder"
+                   Watermark="{Binding DownloadFolderWatermark}"
                    MinHeight="36" />
           <Button Classes="primary-button"
                   Content="{Binding TokenButtonText}"
@@ -101,8 +104,7 @@
       </Border>
 
       <Border Classes="note-card">
-        <TextBlock Classes="body-text"
-                   Text="Users and videos are browse-only. Albums, playlists, artists, tracks, and podcast episodes resolve into downloadable tracks." />
+        <TextBlock Classes="body-text" Text="{Binding NoteBrowseOnly}" />
       </Border>
     </StackPanel>
 
@@ -110,16 +112,16 @@
       <Grid ColumnDefinitions="*,200,140">
         <TextBox Grid.Column="0"
                  Text="{Binding SearchText}"
-                 Watermark="Search tracks, albums, artists, playlists, podcasts, videos, users"
+                 Watermark="{Binding SearchPlaceholder}"
                  MinHeight="42" />
         <ComboBox Grid.Column="1"
                   ItemsSource="{Binding SearchScopes}"
-                  SelectedItem="{Binding SelectedScope}"
+                  SelectedItem="{Binding SelectedScopeOption, Mode=TwoWay}"
                   Width="190"
                   Margin="12,0,0,0" />
         <Button Grid.Column="2"
                 Classes="warm-button"
-                Content="Search"
+                Content="{Binding SearchButtonText}"
                 IsEnabled="{Binding CanSearch}"
                 Margin="12,0,0,0"
                 Click="SearchButton_OnClick" />
@@ -130,8 +132,8 @@
           <Border Grid.Row="0" Classes="card">
             <Grid RowDefinitions="Auto,*">
               <StackPanel>
-                <TextBlock Classes="section-title" Text="Results" />
-                <TextBlock Classes="muted-text" Text="Search hits from the selected Yandex scope." />
+                <TextBlock Classes="section-title" Text="{Binding ResultsSectionTitle}" />
+                <TextBlock Classes="muted-text" Text="{Binding ResultsHint}" />
               </StackPanel>
               <ListBox Grid.Row="1"
                        Margin="0,12,0,0"
@@ -149,7 +151,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="10">
                           <Button Classes="small-button"
                                   Background="#184A54"
-                                  Content="Open"
+                                  Content="{Binding OpenLabel}"
                                   Click="OpenResult_OnClick" />
                           <Button Classes="small-button"
                                   Background="{Binding ActionBrush}"
@@ -167,8 +169,8 @@
           <Border Grid.Row="1" Classes="card" Margin="0,18,0,0">
             <Grid RowDefinitions="Auto,*">
               <StackPanel>
-                <TextBlock Classes="section-title" Text="Queue" />
-                <TextBlock Classes="muted-text" Text="Downloads run one after another to keep things predictable." />
+                <TextBlock Classes="section-title" Text="{Binding QueueSectionTitle}" />
+                <TextBlock Classes="muted-text" Text="{Binding QueueHint}" />
               </StackPanel>
               <ItemsControl Grid.Row="1" Margin="0,12,0,0" ItemsSource="{Binding Queue}">
                 <ItemsControl.ItemTemplate>
@@ -177,7 +179,7 @@
                       <StackPanel Spacing="4">
                         <TextBlock Classes="result-title" Text="{Binding Title}" />
                         <TextBlock Classes="subtle-text" Text="{Binding Subtitle}" />
-                        <TextBlock FontWeight="SemiBold" Foreground="{Binding StatusBrush}" Text="{Binding Status}" />
+                        <TextBlock FontWeight="SemiBold" Foreground="{Binding StatusBrush}" Text="{Binding StatusText}" />
                         <TextBlock Classes="body-text" Text="{Binding DisplayPath}" />
                         <TextBlock Foreground="#B42318"
                                    TextWrapping="Wrap"
@@ -195,8 +197,8 @@
         <Border Grid.Column="1" Classes="card" Margin="18,0,0,0">
           <Grid RowDefinitions="Auto,*">
             <StackPanel>
-              <TextBlock Classes="section-title" Text="Details" />
-              <TextBlock Classes="muted-text" Text="Inspect a result before downloading it." />
+              <TextBlock Classes="section-title" Text="{Binding DetailsSectionTitle}" />
+              <TextBlock Classes="muted-text" Text="{Binding DetailInspectHint}" />
             </StackPanel>
 
             <ScrollViewer Grid.Row="1" Margin="0,12,0,0">
@@ -211,7 +213,7 @@
                 <TextBlock Classes="body-text" Text="{Binding DetailDescription}" />
                 <Button Classes="small-button"
                         Background="#0F766E"
-                        Content="Download all"
+                        Content="{Binding DownloadAllText}"
                         IsVisible="{Binding CanDownloadDetail}"
                         Click="DownloadAll_OnClick" />
                 <TextBlock Classes="body-text"
@@ -230,7 +232,7 @@
                           <Button Grid.Column="1"
                                   Classes="small-button"
                                   Background="#A64B2A"
-                                  Content="Queue track"
+                                  Content="{Binding QueueLabel}"
                                   Margin="12,0,0,0"
                                   Click="QueueTrack_OnClick" />
                         </Grid>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActionBrowse" xml:space="preserve"><value>Browse</value></data>
+  <data name="ActionDownload" xml:space="preserve"><value>Download</value></data>
+  <data name="DetailEmptyBrowseOnly" xml:space="preserve"><value>This result can be browsed but not downloaded.</value></data>
+  <data name="DetailEmptyNoTracks" xml:space="preserve"><value>No tracks were returned.</value></data>
+  <data name="DetailEmptyPickResult" xml:space="preserve"><value>Pick a result to inspect tracks or browse-only details.</value></data>
+  <data name="DetailInspectHint" xml:space="preserve"><value>Inspect a result before downloading it.</value></data>
+  <data name="DetailsSectionTitle" xml:space="preserve"><value>Details</value></data>
+  <data name="DownloadAll" xml:space="preserve"><value>Download all</value></data>
+  <data name="DownloadFolder" xml:space="preserve"><value>Download folder</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageLabel" xml:space="preserve"><value>Language</value></data>
+  <data name="LanguageRussian" xml:space="preserve"><value>Russian</value></data>
+  <data name="MainWindowTitle" xml:space="preserve"><value>Yndx Music Browser</value></data>
+  <data name="NoteBrowseOnly" xml:space="preserve"><value>Users and videos are browse-only. Albums, playlists, artists, tracks, and podcast episodes resolve into downloadable tracks.</value></data>
+  <data name="QueueAdded" xml:space="preserve"><value>Added items to the download queue.</value></data>
+  <data name="QueueRunHint" xml:space="preserve"><value>Downloads run one after another to keep things predictable.</value></data>
+  <data name="QueueSectionTitle" xml:space="preserve"><value>Queue</value></data>
+  <data name="QueueStatusDone" xml:space="preserve"><value>Done</value></data>
+  <data name="QueueStatusDownloading" xml:space="preserve"><value>Downloading</value></data>
+  <data name="QueueStatusFailed" xml:space="preserve"><value>Failed</value></data>
+  <data name="QueueStatusPending" xml:space="preserve"><value>Pending</value></data>
+  <data name="QueueTrack" xml:space="preserve"><value>Queue track</value></data>
+  <data name="ResultOpen" xml:space="preserve"><value>Open</value></data>
+  <data name="ResultsHint" xml:space="preserve"><value>Search hits from the selected Yandex scope.</value></data>
+  <data name="ResultsSectionTitle" xml:space="preserve"><value>Results</value></data>
+  <data name="SavedTokenBody" xml:space="preserve"><value>A saved token was found. You can use it without showing the token value, replace it with a new one, or cancel.</value></data>
+  <data name="SavedTokenCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="SavedTokenChange" xml:space="preserve"><value>Change token</value></data>
+  <data name="SavedTokenTitle" xml:space="preserve"><value>Saved Token</value></data>
+  <data name="SavedTokenUse" xml:space="preserve"><value>Use saved token</value></data>
+  <data name="SavedTokenQuestion" xml:space="preserve"><value>Use saved token?</value></data>
+  <data name="ScopeAlbum" xml:space="preserve"><value>Albums</value></data>
+  <data name="ScopeArtist" xml:space="preserve"><value>Artists</value></data>
+  <data name="ScopePlaylist" xml:space="preserve"><value>Playlists</value></data>
+  <data name="ScopePodcastEpisode" xml:space="preserve"><value>Podcast episodes</value></data>
+  <data name="ScopeTrack" xml:space="preserve"><value>Tracks</value></data>
+  <data name="ScopeUser" xml:space="preserve"><value>Users</value></data>
+  <data name="ScopeVideo" xml:space="preserve"><value>Videos</value></data>
+  <data name="SearchButton" xml:space="preserve"><value>Search</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Search tracks, albums, artists, playlists, podcasts, videos, users</value></data>
+  <data name="SessionHint" xml:space="preserve"><value>A token is required at startup, then it stays hidden unless you choose to replace it.</value></data>
+  <data name="SessionSectionTitle" xml:space="preserve"><value>Session</value></data>
+  <data name="SetToken" xml:space="preserve"><value>Set token</value></data>
+  <data name="StatusAddedQueue" xml:space="preserve"><value>Added items to the download queue.</value></data>
+  <data name="StatusChooseSavedToken" xml:space="preserve"><value>Choose whether to use the saved token or replace it.</value></data>
+  <data name="StatusConnectedAs" xml:space="preserve"><value>Connected as {0}.</value></data>
+  <data name="StatusConnectFirst" xml:space="preserve"><value>Connect with your token first.</value></data>
+  <data name="StatusDownloadFailed" xml:space="preserve"><value>Failed to download {0}.</value></data>
+  <data name="StatusDownloaded" xml:space="preserve"><value>Downloaded {0}.</value></data>
+  <data name="StatusEnterToken" xml:space="preserve"><value>Enter a Yandex token to start.</value></data>
+  <data name="StatusLoadedBrowseOnly" xml:space="preserve"><value>This result is browse-only.</value></data>
+  <data name="StatusLoadedDetails" xml:space="preserve"><value>Loaded details for {0}.</value></data>
+  <data name="StatusNoResults" xml:space="preserve"><value>No {0} results found.</value></data>
+  <data name="StatusNotConnected" xml:space="preserve"><value>Not connected</value></data>
+  <data name="StatusResultsLoaded" xml:space="preserve"><value>Loaded {0} result(s).</value></data>
+  <data name="StatusSearchPrompt" xml:space="preserve"><value>Type something to search.</value></data>
+  <data name="TokenPromptBody" xml:space="preserve"><value>The app needs a token before it can search or download. The token is saved locally in plain text, matching your earlier preference.</value></data>
+  <data name="TokenPromptCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="TokenPromptConfirm" xml:space="preserve"><value>Use token</value></data>
+  <data name="TokenPromptEmptyError" xml:space="preserve"><value>Token cannot be empty.</value></data>
+  <data name="TokenPromptPlaceholder" xml:space="preserve"><value>Paste token here</value></data>
+  <data name="TokenPromptTitle" xml:space="preserve"><value>Yandex Token</value></data>
+  <data name="TokenPromptWindowTitle" xml:space="preserve"><value>Enter your Yandex token</value></data>
+  <data name="UnknownArtist" xml:space="preserve"><value>Unknown artist</value></data>
+  <data name="YandexAlbumDescription" xml:space="preserve"><value>{0} tracks{1}</value></data>
+  <data name="YandexArtistFallback" xml:space="preserve"><value>Artist</value></data>
+  <data name="YandexArtistTracksCount" xml:space="preserve"><value>{0} track results</value></data>
+  <data name="YandexBrowseOnly" xml:space="preserve"><value>Browse only</value></data>
+  <data name="YandexConnectFirst" xml:space="preserve"><value>Connect with a Yandex token first.</value></data>
+  <data name="YandexFolderAlbums" xml:space="preserve"><value>Albums</value></data>
+  <data name="YandexFolderArtists" xml:space="preserve"><value>Artists</value></data>
+  <data name="YandexFolderPlaylist" xml:space="preserve"><value>Playlists</value></data>
+  <data name="YandexFolderPodcastEpisodes" xml:space="preserve"><value>Podcast Episodes</value></data>
+  <data name="YandexFolderTracks" xml:space="preserve"><value>Tracks</value></data>
+  <data name="YandexPlaylistFallback" xml:space="preserve"><value>Playlist</value></data>
+  <data name="YandexPlaylistTrackCount" xml:space="preserve"><value>{0} tracks</value></data>
+  <data name="YandexPodcastEpisode" xml:space="preserve"><value>Podcast episode</value></data>
+  <data name="YandexTrack" xml:space="preserve"><value>Track</value></data>
+  <data name="YandexTrackDetailMissing" xml:space="preserve"><value>Track details were not returned by the API.</value></data>
+  <data name="YandexUserDescription" xml:space="preserve"><value>The package exposes user search results without rich fields.</value></data>
+  <data name="YandexUserDetailDescription" xml:space="preserve"><value>The current package exposes user search hits without fields that can be turned into downloadable tracks.</value></data>
+  <data name="YandexUserResult" xml:space="preserve"><value>User result</value></data>
+  <data name="YandexVideoDetailFallback" xml:space="preserve"><value>The API returns video metadata, but no downloadable audio track mapping.</value></data>
+  <data name="YandexPlaylistIdentifiersMissing" xml:space="preserve"><value>Playlist search result does not contain enough identifiers.</value></data>
+</root>

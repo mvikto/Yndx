@@ -22,6 +22,7 @@ namespace Yndx.Services;
 public sealed class YandexMusicService
 {
     private readonly YandexMusicApi _api = new();
+    private readonly LocalizationService _localization = LocalizationService.Instance;
     private AuthStorage _storage = new();
 
     public bool IsAuthorized => _storage.IsAuthorized;
@@ -98,94 +99,94 @@ public sealed class YandexMusicService
         return targetPath;
     }
 
-    private static SearchResultItem ToTrackSearchResult(YSearchTrackModel track)
+    private SearchResultItem ToTrackSearchResult(YSearchTrackModel track)
     {
         return new SearchResultItem
         {
             Kind = SearchScope.Track,
             Title = track.Title,
             Subtitle = BuildTrackSubtitle(track.Artists),
-            Description = track.Albums?.FirstOrDefault()?.Title ?? "Track",
+            Description = track.Albums?.FirstOrDefault()?.Title ?? T("YandexTrack"),
             CanDownload = true,
             RawItem = track
         };
     }
 
-    private static SearchResultItem ToPodcastSearchResult(YSearchTrackModel track)
+    private SearchResultItem ToPodcastSearchResult(YSearchTrackModel track)
     {
         return new SearchResultItem
         {
             Kind = SearchScope.PodcastEpisode,
             Title = track.Title,
             Subtitle = BuildTrackSubtitle(track.Artists),
-            Description = track.ShortDescription ?? "Podcast episode",
+            Description = track.ShortDescription ?? T("YandexPodcastEpisode"),
             CanDownload = true,
             RawItem = track
         };
     }
 
-    private static SearchResultItem ToAlbumSearchResult(YSearchAlbumModel album)
+    private SearchResultItem ToAlbumSearchResult(YSearchAlbumModel album)
     {
         return new SearchResultItem
         {
             Kind = SearchScope.Album,
             Title = album.Title,
             Subtitle = JoinArtistNames(album.Artists),
-            Description = $"{album.TrackCount} tracks{FormatYear(album.Year)}",
+            Description = _localization.Format("YandexAlbumDescription", album.TrackCount, FormatYear(album.Year)),
             CanDownload = true,
             RawItem = album
         };
     }
 
-    private static SearchResultItem ToArtistSearchResult(YSearchArtistModel artist)
+    private SearchResultItem ToArtistSearchResult(YSearchArtistModel artist)
     {
         return new SearchResultItem
         {
             Kind = SearchScope.Artist,
             Title = artist.Name,
             Subtitle = string.Join(", ", artist.Genres?.Take(3) ?? []),
-            Description = artist.Description?.Text ?? "Artist",
+            Description = artist.Description?.Text ?? T("YandexArtistFallback"),
             CanDownload = true,
             RawItem = artist
         };
     }
 
-    private static SearchResultItem ToPlaylistSearchResult(YSearchPlaylistModel playlist)
+    private SearchResultItem ToPlaylistSearchResult(YSearchPlaylistModel playlist)
     {
-        var owner = playlist.Owner?.Name ?? playlist.Owner?.Login ?? playlist.Owner?.Uid ?? "Playlist";
+        var owner = playlist.Owner?.Name ?? playlist.Owner?.Login ?? playlist.Owner?.Uid ?? T("YandexPlaylistFallback");
 
         return new SearchResultItem
         {
             Kind = SearchScope.Playlist,
             Title = playlist.Title,
             Subtitle = owner,
-            Description = $"{playlist.TrackCount} tracks",
+            Description = _localization.Format("YandexPlaylistTrackCount", playlist.TrackCount),
             CanDownload = true,
             RawItem = playlist
         };
     }
 
-    private static SearchResultItem ToVideoSearchResult(YSearchVideoModel video)
+    private SearchResultItem ToVideoSearchResult(YSearchVideoModel video)
     {
         return new SearchResultItem
         {
             Kind = SearchScope.Video,
             Title = video.Title,
-            Subtitle = "Browse only",
+            Subtitle = T("YandexBrowseOnly"),
             Description = video.Text ?? string.Empty,
             CanDownload = false,
             RawItem = video
         };
     }
 
-    private static SearchResultItem ToUserSearchResult(YSearchUserModel user)
+    private SearchResultItem ToUserSearchResult(YSearchUserModel user)
     {
         return new SearchResultItem
         {
             Kind = SearchScope.User,
-            Title = "User result",
-            Subtitle = "Browse only",
-            Description = "The package exposes user search results without rich fields.",
+            Title = T("YandexUserResult"),
+            Subtitle = T("YandexBrowseOnly"),
+            Description = T("YandexUserDescription"),
             CanDownload = false,
             RawItem = user
         };
@@ -194,16 +195,16 @@ public sealed class YandexMusicService
     private async Task<EntityDetail> BuildTrackDetailAsync(YSearchTrackModel searchTrack, bool isPodcast)
     {
         var track = (await _api.Track.GetAsync(_storage, searchTrack.Id)).Result.FirstOrDefault()
-            ?? throw new InvalidOperationException("Track details were not returned by the API.");
+            ?? throw new InvalidOperationException(T("YandexTrackDetailMissing"));
 
         return new EntityDetail
         {
             Title = track.Title,
             Subtitle = BuildTrackSubtitle(track.Artists),
             Description = isPodcast
-                ? track.ShortDescription ?? "Podcast episode"
-                : track.Albums?.FirstOrDefault()?.Title ?? "Track",
-            FolderHint = isPodcast ? "Podcast Episodes" : "Tracks",
+                ? track.ShortDescription ?? T("YandexPodcastEpisode")
+                : track.Albums?.FirstOrDefault()?.Title ?? T("YandexTrack"),
+            FolderHint = isPodcast ? T("YandexFolderPodcastEpisodes") : T("YandexFolderTracks"),
             CanDownloadAll = true,
             IsBrowseOnly = false,
             Tracks = [ToTrackEntry(track)]
@@ -219,8 +220,8 @@ public sealed class YandexMusicService
         {
             Title = album.Title,
             Subtitle = JoinArtistNames(album.Artists),
-            Description = album.Description ?? $"{tracks.Count} tracks{FormatYear(album.Year)}",
-            FolderHint = Path.Combine("Albums", FileNameSanitizer.SanitizeSegment($"{JoinArtistNames(album.Artists)} - {album.Title}")),
+            Description = album.Description ?? _localization.Format("YandexAlbumDescription", tracks.Count, FormatYear(album.Year)),
+            FolderHint = Path.Combine(T("YandexFolderAlbums"), FileNameSanitizer.SanitizeSegment($"{JoinArtistNames(album.Artists)} - {album.Title}")),
             CanDownloadAll = tracks.Count > 0,
             IsBrowseOnly = false,
             Tracks = tracks.Select(ToTrackEntry).ToList()
@@ -236,8 +237,8 @@ public sealed class YandexMusicService
         {
             Title = searchArtist.Name,
             Subtitle = string.Join(", ", searchArtist.Genres?.Take(3) ?? []),
-            Description = searchArtist.Description?.Text ?? $"{tracks.Count} track results",
-            FolderHint = Path.Combine("Artists", FileNameSanitizer.SanitizeSegment(searchArtist.Name)),
+            Description = searchArtist.Description?.Text ?? _localization.Format("YandexArtistTracksCount", tracks.Count),
+            FolderHint = Path.Combine(T("YandexFolderArtists"), FileNameSanitizer.SanitizeSegment(searchArtist.Name)),
             CanDownloadAll = tracks.Count > 0,
             IsBrowseOnly = false,
             Tracks = tracks.Select(ToTrackEntry).ToList()
@@ -258,7 +259,7 @@ public sealed class YandexMusicService
         }
         else
         {
-            throw new InvalidOperationException("Playlist search result does not contain enough identifiers.");
+            throw new InvalidOperationException(T("YandexPlaylistIdentifiersMissing"));
         }
 
         var tracks = playlist.Tracks?
@@ -267,28 +268,28 @@ public sealed class YandexMusicService
             .Cast<YTrack>()
             .ToList() ?? [];
 
-        var owner = playlist.Owner?.Name ?? playlist.Owner?.Login ?? playlist.Owner?.Uid ?? "Playlist";
+        var owner = playlist.Owner?.Name ?? playlist.Owner?.Login ?? playlist.Owner?.Uid ?? T("YandexPlaylistFallback");
 
         return new EntityDetail
         {
             Title = playlist.Title,
             Subtitle = owner,
-            Description = playlist.Description ?? $"{tracks.Count} tracks",
-            FolderHint = Path.Combine("Playlists", FileNameSanitizer.SanitizeSegment($"{owner} - {playlist.Title}")),
+            Description = playlist.Description ?? _localization.Format("YandexPlaylistTrackCount", tracks.Count),
+            FolderHint = Path.Combine(T("YandexFolderPlaylist"), FileNameSanitizer.SanitizeSegment($"{owner} - {playlist.Title}")),
             CanDownloadAll = tracks.Count > 0,
             IsBrowseOnly = false,
             Tracks = tracks.Select(ToTrackEntry).ToList()
         };
     }
 
-    private static EntityDetail BuildVideoDetail(YSearchVideoModel video)
+    private EntityDetail BuildVideoDetail(YSearchVideoModel video)
     {
         return new EntityDetail
         {
             Title = video.Title,
-            Subtitle = "Browse only",
+            Subtitle = T("YandexBrowseOnly"),
             Description = string.IsNullOrWhiteSpace(video.YoutubeUrl)
-                ? video.Text ?? "The API returns video metadata, but no downloadable audio track mapping."
+                ? video.Text ?? T("YandexVideoDetailFallback")
                 : $"{video.Text}\n{video.YoutubeUrl}",
             FolderHint = string.Empty,
             CanDownloadAll = false,
@@ -297,13 +298,13 @@ public sealed class YandexMusicService
         };
     }
 
-    private static EntityDetail BuildUserDetail(YSearchUserModel user)
+    private EntityDetail BuildUserDetail(YSearchUserModel user)
     {
         return new EntityDetail
         {
-            Title = "User result",
-            Subtitle = "Browse only",
-            Description = "The current package exposes user search hits without fields that can be turned into downloadable tracks.",
+            Title = T("YandexUserResult"),
+            Subtitle = T("YandexBrowseOnly"),
+            Description = T("YandexUserDetailDescription"),
             FolderHint = string.Empty,
             CanDownloadAll = false,
             IsBrowseOnly = true,
@@ -334,7 +335,7 @@ public sealed class YandexMusicService
     private static string BuildTrackSubtitle(IEnumerable<YArtist>? artists)
     {
         var artistLabel = JoinArtistNames(artists);
-        return string.IsNullOrWhiteSpace(artistLabel) ? "Unknown artist" : artistLabel;
+        return string.IsNullOrWhiteSpace(artistLabel) ? LocalizationService.Instance["UnknownArtist"] : artistLabel;
     }
 
     private static string JoinArtistNames(IEnumerable<YArtist>? artists)
@@ -351,7 +352,12 @@ public sealed class YandexMusicService
     {
         if (!_storage.IsAuthorized)
         {
-            throw new InvalidOperationException("Connect with a Yandex token first.");
+            throw new InvalidOperationException(T("YandexConnectFirst"));
         }
+    }
+
+    private string T(string key)
+    {
+        return _localization[key];
     }
 }

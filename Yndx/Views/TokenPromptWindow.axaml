@@ -1,7 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="Yndx.Views.TokenPromptWindow"
-        Title="Yandex Token"
         Width="620"
         Height="340"
         MinWidth="520"
@@ -10,45 +9,44 @@
         WindowStartupLocation="CenterOwner"
         Background="#F4EFE6">
   <Grid Margin="24" RowDefinitions="Auto,Auto,*,Auto">
-    <TextBlock FontSize="28"
+    <TextBlock x:Name="TitleText"
+               FontSize="28"
                FontWeight="Bold"
-               Foreground="#14383B"
-               Text="Enter your Yandex token" />
+               Foreground="#14383B" />
 
-    <TextBlock Grid.Row="1"
+    <TextBlock x:Name="BodyText"
+               Grid.Row="1"
                Margin="0,14,0,0"
                TextWrapping="Wrap"
-               Foreground="#5C6667"
-               Text="The app needs a token before it can search or download. The token is saved locally in plain text, matching your earlier preference." />
+               Foreground="#5C6667" />
 
-    <TextBox Name="TokenTextBox"
+    <TextBox x:Name="TokenTextBox"
              Grid.Row="2"
              Margin="0,14,0,0"
              AcceptsReturn="True"
              TextWrapping="Wrap"
-             VerticalContentAlignment="Top"
-             Watermark="Paste token here" />
+             VerticalContentAlignment="Top" />
 
     <Grid Grid.Row="3" ColumnDefinitions="*,Auto,Auto" Margin="0,14,0,0">
-      <TextBlock Name="ErrorText"
+      <TextBlock x:Name="ErrorText"
                  VerticalAlignment="Center"
                  Foreground="#B42318"
                  TextWrapping="Wrap" />
-      <Button Grid.Column="1"
+      <Button x:Name="CancelButton"
+              Grid.Column="1"
               Margin="12,0,0,0"
               Background="#A9A094"
               Foreground="White"
               CornerRadius="12"
               Padding="18,10"
-              Content="Cancel"
               Click="Cancel_OnClick" />
-      <Button Grid.Column="2"
+      <Button x:Name="ConfirmButton"
+              Grid.Column="2"
               Margin="12,0,0,0"
               Background="#0F766E"
               Foreground="White"
               CornerRadius="12"
               Padding="18,10"
-              Content="Use token"
               Click="Confirm_OnClick" />
     </Grid>
   </Grid>

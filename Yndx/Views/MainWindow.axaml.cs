@@ -1,15 +1,18 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia;
 
 using Yndx.Models;
+using Yndx.Services;
 using Yndx.ViewModels;
 
 namespace Yndx.Views;
 
 public partial class MainWindow : Window
 {
+    private readonly LocalizationService _localization = LocalizationService.Instance;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -121,7 +124,7 @@ public partial class MainWindow : Window
     {
         var dialog = new Window
         {
-            Title = "Saved Token",
+            Title = _localization["SavedTokenTitle"],
             Width = 500,
             Height = 220,
             CanResize = false,
@@ -133,7 +136,7 @@ public partial class MainWindow : Window
 
         var cancelButton = new Button
         {
-            Content = "Cancel",
+            Content = _localization["SavedTokenCancel"],
             Background = Avalonia.Media.Brush.Parse("#A9A094"),
             Foreground = Avalonia.Media.Brushes.White,
             CornerRadius = new CornerRadius(12),
@@ -147,7 +150,7 @@ public partial class MainWindow : Window
 
         var replaceButton = new Button
         {
-            Content = "Change token",
+            Content = _localization["SavedTokenChange"],
             Background = Avalonia.Media.Brush.Parse("#A64B2A"),
             Foreground = Avalonia.Media.Brushes.White,
             CornerRadius = new CornerRadius(12),
@@ -161,7 +164,7 @@ public partial class MainWindow : Window
 
         var useSavedButton = new Button
         {
-            Content = "Use saved token",
+            Content = _localization["SavedTokenUse"],
             Background = Avalonia.Media.Brush.Parse("#0F766E"),
             Foreground = Avalonia.Media.Brushes.White,
             CornerRadius = new CornerRadius(12),
@@ -181,14 +184,14 @@ public partial class MainWindow : Window
             {
                 new TextBlock
                 {
-                    Text = "Use saved token?",
+                    Text = _localization["SavedTokenQuestion"],
                     FontSize = 28,
                     FontWeight = Avalonia.Media.FontWeight.Bold,
                     Foreground = Avalonia.Media.Brush.Parse("#14383B")
                 },
                 new TextBlock
                 {
-                    Text = "A saved token was found. You can use it without showing the token value, replace it with a new one, or cancel.",
+                    Text = _localization["SavedTokenBody"],
                     TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                     Foreground = Avalonia.Media.Brush.Parse("#5C6667"),
                     Margin = new Thickness(0, 14, 0, 0)

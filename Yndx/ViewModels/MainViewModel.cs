@@ -1,5 +1,6 @@
-using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 using Yandex.Music.Api.Models.Track;
@@ -13,22 +14,65 @@ public sealed class MainViewModel : INotifyPropertyChanged
 {
     private readonly AppSettingsStore _settingsStore = new();
     private readonly YandexMusicService _musicService = new();
+    private readonly LocalizationService _localization = LocalizationService.Instance;
     private readonly ObservableCollection<DownloadQueueItem> _queue = [];
     private readonly ObservableCollection<SearchResultItem> _results = [];
+    private readonly ObservableCollection<SearchScopeOption> _searchScopes = [];
+    private readonly ObservableCollection<LanguageOption> _languageOptions = [];
 
     private bool _queueRunning;
     private string _token = string.Empty;
     private string _downloadFolder = string.Empty;
     private string _searchText = string.Empty;
     private SearchScope _selectedScope = SearchScope.Track;
+    private SearchScopeOption? _selectedScopeOption;
+    private LanguageOption? _selectedLanguageOption;
     private bool _isBusy;
     private bool _isConnected;
-    private string _statusMessage = "Paste a token to connect.";
-    private string _accountDisplay = "Not connected";
+    private string _statusMessage = string.Empty;
+    private string _accountDisplay = string.Empty;
     private SearchResultItem? _selectedResult;
     private EntityDetail? _detail;
 
+    public MainViewModel()
+    {
+        _localization.PropertyChanged += OnLocalizationChanged;
+        _accountDisplay = T("StatusNotConnected");
+        _statusMessage = T("StatusEnterToken");
+        RebuildOptionCollections();
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public string MainWindowTitle => T("MainWindowTitle");
+
+    public string SessionSectionTitle => T("SessionSectionTitle");
+
+    public string SessionHint => T("SessionHint");
+
+    public string DownloadFolderWatermark => T("DownloadFolder");
+
+    public string LanguageLabel => T("LanguageLabel");
+
+    public string NoteBrowseOnly => T("NoteBrowseOnly");
+
+    public string SearchPlaceholder => T("SearchPlaceholder");
+
+    public string SearchButtonText => T("SearchButton");
+
+    public string ResultsSectionTitle => T("ResultsSectionTitle");
+
+    public string ResultsHint => T("ResultsHint");
+
+    public string QueueSectionTitle => T("QueueSectionTitle");
+
+    public string QueueHint => T("QueueRunHint");
+
+    public string DetailsSectionTitle => T("DetailsSectionTitle");
+
+    public string DetailInspectHint => T("DetailInspectHint");
+
+    public string DownloadAllText => T("DownloadAll");
 
     public string Token
     {
@@ -62,13 +106,31 @@ public sealed class MainViewModel : INotifyPropertyChanged
         set => SetField(ref _searchText, value);
     }
 
-    public SearchScope SelectedScope
+    public ObservableCollection<SearchScopeOption> SearchScopes => _searchScopes;
+
+    public SearchScopeOption? SelectedScopeOption
     {
-        get => _selectedScope;
+        get => _selectedScopeOption;
         set
         {
-            if (SetField(ref _selectedScope, value))
+            if (SetField(ref _selectedScopeOption, value) && value is not null)
             {
+                _selectedScope = value.Scope;
+                _ = PersistSettingsAsync();
+            }
+        }
+    }
+
+    public ObservableCollection<LanguageOption> LanguageOptions => _languageOptions;
+
+    public LanguageOption? SelectedLanguageOption
+    {
+        get => _selectedLanguageOption;
+        set
+        {
+            if (SetField(ref _selectedLanguageOption, value) && value is not null)
+            {
+                _localization.SetLanguage(value.Language);
                 _ = PersistSettingsAsync();
             }
         }
@@ -113,7 +175,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public bool HasSavedToken => !string.IsNullOrWhiteSpace(Token);
 
-    public string TokenButtonText => HasSavedToken ? "Change token" : "Set token";
+    public string TokenButtonText => HasSavedToken ? T("SavedTokenChange") : T("SetToken");
 
     public bool NotBusy => !IsBusy;
 
@@ -153,11 +215,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public ObservableCollection<DownloadQueueItem> Queue => _queue;
 
-    public IEnumerable<SearchScope> SearchScopes => Enum.GetValues<SearchScope>();
-
     public IReadOnlyList<TrackEntry> DetailTracks => Detail?.Tracks ?? [];
 
-    public string DetailTitle => Detail?.Title ?? "Pick a result to inspect tracks or browse-only details.";
+    public string DetailTitle => Detail?.Title ?? T("DetailEmptyPickResult");
 
     public string DetailSubtitle => Detail?.Subtitle ?? string.Empty;
 
@@ -168,36 +228,40 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public bool IsDetailEmpty => Detail is null || Detail.Tracks.Count == 0;
 
     public string DetailEmptyMessage => Detail is null
-        ? "Pick a result to inspect tracks or browse-only details."
+        ? T("DetailEmptyPickResult")
         : Detail.IsBrowseOnly
-            ? "This result can be browsed but not downloaded."
-            : "No tracks were returned.";
+            ? T("DetailEmptyBrowseOnly")
+            : T("DetailEmptyNoTracks");
 
     public async Task InitializeAsync()
     {
         var settings = await _settingsStore.LoadAsync();
+
+        _localization.Initialize(settings.Language);
         _token = settings.Token;
         _downloadFolder = string.IsNullOrWhiteSpace(settings.DownloadFolder)
             ? BuildDefaultDownloadFolder()
             : settings.DownloadFolder;
         _selectedScope = settings.SearchScope;
+        _accountDisplay = T("StatusNotConnected");
+
+        RebuildOptionCollections();
 
         RaisePropertyChanged(nameof(Token));
         RaisePropertyChanged(nameof(DownloadFolder));
-        RaisePropertyChanged(nameof(SelectedScope));
         RaisePropertyChanged(nameof(HasSavedToken));
         RaisePropertyChanged(nameof(TokenButtonText));
 
         StatusMessage = string.IsNullOrWhiteSpace(Token)
-            ? "Enter a Yandex token to start."
-            : "Choose whether to use the saved token or replace it.";
+            ? T("StatusEnterToken")
+            : T("StatusChooseSavedToken");
     }
 
     public async Task<bool> ConnectAsync()
     {
         if (string.IsNullOrWhiteSpace(Token))
         {
-            StatusMessage = "Enter a Yandex token to start.";
+            StatusMessage = T("StatusEnterToken");
             return false;
         }
 
@@ -208,7 +272,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             var account = await _musicService.ConnectAsync(Token);
             IsConnected = true;
             AccountDisplay = string.IsNullOrWhiteSpace(account.DisplayName) ? account.Login : account.DisplayName;
-            StatusMessage = $"Connected as {AccountDisplay}.";
+            StatusMessage = _localization.Format("StatusConnectedAs", AccountDisplay);
             success = true;
             await PersistSettingsAsync();
 
@@ -222,7 +286,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             await _musicService.DisconnectAsync();
             IsConnected = false;
-            AccountDisplay = "Not connected";
+            AccountDisplay = T("StatusNotConnected");
         }
 
         return success;
@@ -243,13 +307,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            StatusMessage = "Type something to search.";
+            StatusMessage = T("StatusSearchPrompt");
             return;
         }
 
         await RunBusyAsync(async () =>
         {
-            var items = await _musicService.SearchAsync(SearchText.Trim(), SelectedScope);
+            var items = await _musicService.SearchAsync(SearchText.Trim(), _selectedScope);
 
             _results.Clear();
             foreach (var item in items)
@@ -260,8 +324,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
             SelectedResult = null;
             Detail = null;
             StatusMessage = _results.Count == 0
-                ? $"No {SelectedScope.ToString().ToLowerInvariant()} results found."
-                : $"Loaded {_results.Count} result(s).";
+                ? _localization.Format("StatusNoResults", GetScopeLabel(_selectedScope).ToLower(CultureInfo.CurrentCulture))
+                : _localization.Format("StatusResultsLoaded", _results.Count);
         });
     }
 
@@ -276,8 +340,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             Detail = await _musicService.LoadDetailAsync(item);
             StatusMessage = Detail.IsBrowseOnly
-                ? "This result is browse-only."
-                : $"Loaded details for {item.Title}.";
+                ? T("StatusLoadedBrowseOnly")
+                : _localization.Format("StatusLoadedDetails", item.Title);
         });
     }
 
@@ -305,7 +369,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             });
         }
 
-        StatusMessage = "Added items to the download queue.";
+        StatusMessage = T("StatusAddedQueue");
 
         if (!_queueRunning)
         {
@@ -331,7 +395,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public Task QueueTrackEntryAsync(TrackEntry track)
     {
-        var folderHint = Detail?.FolderHint ?? "Tracks";
+        var folderHint = Detail?.FolderHint ?? T("YandexFolderTracks");
         return QueueSingleTrackAsync(track.Track, folderHint);
     }
 
@@ -351,23 +415,22 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         try
         {
-            foreach (var item in _queue.Where(queueItem => queueItem.Status == "Pending"))
+            foreach (var item in _queue.Where(queueItem => queueItem.Status == DownloadStatus.Pending))
             {
-                item.Status = "Downloading";
+                item.Status = DownloadStatus.Downloading;
                 item.Error = string.Empty;
                 try
                 {
                     item.TargetPath = await _musicService.DownloadTrackAsync(item.Track, DownloadFolder, item.FolderHint);
-                    item.Status = "Done";
-                    StatusMessage = $"Downloaded {item.Title}.";
+                    item.Status = DownloadStatus.Done;
+                    StatusMessage = _localization.Format("StatusDownloaded", item.Title);
                 }
                 catch (Exception ex)
                 {
-                    item.Status = "Failed";
+                    item.Status = DownloadStatus.Failed;
                     item.Error = ex.Message;
-                    StatusMessage = $"Failed to download {item.Title}.";
+                    StatusMessage = _localization.Format("StatusDownloadFailed", item.Title);
                 }
-
             }
         }
         finally
@@ -406,7 +469,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             return true;
         }
 
-        StatusMessage = "Connect with your token first.";
+        StatusMessage = T("StatusConnectFirst");
         return false;
     }
 
@@ -416,7 +479,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             Token = Token,
             DownloadFolder = DownloadFolder,
-            SearchScope = SelectedScope
+            SearchScope = _selectedScope,
+            Language = _localization.CurrentLanguage
         });
     }
 
@@ -429,6 +493,88 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
 
         return Path.Combine(musicDirectory, "Yndx Downloads");
+    }
+
+    private void RebuildOptionCollections()
+    {
+        _searchScopes.Clear();
+        foreach (var scope in Enum.GetValues<SearchScope>())
+        {
+            _searchScopes.Add(new SearchScopeOption
+            {
+                Scope = scope,
+                Label = GetScopeLabel(scope)
+            });
+        }
+
+        _languageOptions.Clear();
+        _languageOptions.Add(new LanguageOption { Language = AppLanguage.English, Label = T("LanguageEnglish") });
+        _languageOptions.Add(new LanguageOption { Language = AppLanguage.Russian, Label = T("LanguageRussian") });
+
+        _selectedScopeOption = _searchScopes.FirstOrDefault(item => item.Scope == _selectedScope) ?? _searchScopes.FirstOrDefault();
+        _selectedLanguageOption = _languageOptions.FirstOrDefault(item => item.Language == _localization.CurrentLanguage) ?? _languageOptions.FirstOrDefault();
+
+        RaisePropertyChanged(nameof(SelectedScopeOption));
+        RaisePropertyChanged(nameof(SelectedLanguageOption));
+    }
+
+    private string GetScopeLabel(SearchScope scope)
+    {
+        return scope switch
+        {
+            SearchScope.Track => T("ScopeTrack"),
+            SearchScope.Album => T("ScopeAlbum"),
+            SearchScope.Artist => T("ScopeArtist"),
+            SearchScope.Playlist => T("ScopePlaylist"),
+            SearchScope.PodcastEpisode => T("ScopePodcastEpisode"),
+            SearchScope.Video => T("ScopeVideo"),
+            SearchScope.User => T("ScopeUser"),
+            _ => scope.ToString()
+        };
+    }
+
+    private string T(string key)
+    {
+        return _localization[key];
+    }
+
+    private void OnLocalizationChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is not (nameof(LocalizationService.CurrentLanguage) or "Item[]"))
+        {
+            return;
+        }
+
+        RebuildOptionCollections();
+
+        if (!IsConnected)
+        {
+            AccountDisplay = T("StatusNotConnected");
+        }
+
+        RaisePropertyChanged(nameof(MainWindowTitle));
+        RaisePropertyChanged(nameof(SessionSectionTitle));
+        RaisePropertyChanged(nameof(SessionHint));
+        RaisePropertyChanged(nameof(DownloadFolderWatermark));
+        RaisePropertyChanged(nameof(LanguageLabel));
+        RaisePropertyChanged(nameof(NoteBrowseOnly));
+        RaisePropertyChanged(nameof(SearchPlaceholder));
+        RaisePropertyChanged(nameof(SearchButtonText));
+        RaisePropertyChanged(nameof(ResultsSectionTitle));
+        RaisePropertyChanged(nameof(ResultsHint));
+        RaisePropertyChanged(nameof(QueueSectionTitle));
+        RaisePropertyChanged(nameof(QueueHint));
+        RaisePropertyChanged(nameof(DetailsSectionTitle));
+        RaisePropertyChanged(nameof(DetailInspectHint));
+        RaisePropertyChanged(nameof(DownloadAllText));
+        RaisePropertyChanged(nameof(TokenButtonText));
+        RaisePropertyChanged(nameof(DetailTitle));
+        RaisePropertyChanged(nameof(DetailEmptyMessage));
+
+        if (string.IsNullOrWhiteSpace(Token) && !IsConnected)
+        {
+            StatusMessage = T("StatusEnterToken");
+        }
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

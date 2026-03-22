@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActionBrowse" xml:space="preserve"><value>Открыть</value></data>
+  <data name="ActionDownload" xml:space="preserve"><value>Скачать</value></data>
+  <data name="DetailEmptyBrowseOnly" xml:space="preserve"><value>Этот результат можно просматривать, но нельзя скачать.</value></data>
+  <data name="DetailEmptyNoTracks" xml:space="preserve"><value>Треки не были получены.</value></data>
+  <data name="DetailEmptyPickResult" xml:space="preserve"><value>Выберите результат, чтобы посмотреть треки или сведения только для просмотра.</value></data>
+  <data name="DetailInspectHint" xml:space="preserve"><value>Изучите результат перед скачиванием.</value></data>
+  <data name="DetailsSectionTitle" xml:space="preserve"><value>Детали</value></data>
+  <data name="DownloadAll" xml:space="preserve"><value>Скачать все</value></data>
+  <data name="DownloadFolder" xml:space="preserve"><value>Папка загрузки</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageLabel" xml:space="preserve"><value>Язык</value></data>
+  <data name="LanguageRussian" xml:space="preserve"><value>Русский</value></data>
+  <data name="MainWindowTitle" xml:space="preserve"><value>Yndx Music Browser</value></data>
+  <data name="NoteBrowseOnly" xml:space="preserve"><value>Пользователи и видео доступны только для просмотра. Альбомы, плейлисты, артисты, треки и эпизоды подкастов превращаются в скачиваемые треки.</value></data>
+  <data name="QueueAdded" xml:space="preserve"><value>Элементы добавлены в очередь загрузки.</value></data>
+  <data name="QueueRunHint" xml:space="preserve"><value>Загрузки идут по очереди, чтобы поведение оставалось предсказуемым.</value></data>
+  <data name="QueueSectionTitle" xml:space="preserve"><value>Очередь</value></data>
+  <data name="QueueStatusDone" xml:space="preserve"><value>Готово</value></data>
+  <data name="QueueStatusDownloading" xml:space="preserve"><value>Загрузка</value></data>
+  <data name="QueueStatusFailed" xml:space="preserve"><value>Ошибка</value></data>
+  <data name="QueueStatusPending" xml:space="preserve"><value>Ожидание</value></data>
+  <data name="QueueTrack" xml:space="preserve"><value>В очередь</value></data>
+  <data name="ResultOpen" xml:space="preserve"><value>Открыть</value></data>
+  <data name="ResultsHint" xml:space="preserve"><value>Результаты поиска по выбранной категории Яндекс Музыки.</value></data>
+  <data name="ResultsSectionTitle" xml:space="preserve"><value>Результаты</value></data>
+  <data name="SavedTokenBody" xml:space="preserve"><value>Найден сохраненный токен. Можно использовать его, не показывая значение, заменить новым или отменить запуск.</value></data>
+  <data name="SavedTokenCancel" xml:space="preserve"><value>Отмена</value></data>
+  <data name="SavedTokenChange" xml:space="preserve"><value>Сменить токен</value></data>
+  <data name="SavedTokenTitle" xml:space="preserve"><value>Сохраненный токен</value></data>
+  <data name="SavedTokenUse" xml:space="preserve"><value>Использовать токен</value></data>
+  <data name="SavedTokenQuestion" xml:space="preserve"><value>Использовать сохраненный токен?</value></data>
+  <data name="ScopeAlbum" xml:space="preserve"><value>Альбомы</value></data>
+  <data name="ScopeArtist" xml:space="preserve"><value>Артисты</value></data>
+  <data name="ScopePlaylist" xml:space="preserve"><value>Плейлисты</value></data>
+  <data name="ScopePodcastEpisode" xml:space="preserve"><value>Эпизоды подкастов</value></data>
+  <data name="ScopeTrack" xml:space="preserve"><value>Треки</value></data>
+  <data name="ScopeUser" xml:space="preserve"><value>Пользователи</value></data>
+  <data name="ScopeVideo" xml:space="preserve"><value>Видео</value></data>
+  <data name="SearchButton" xml:space="preserve"><value>Искать</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Искать треки, альбомы, артистов, плейлисты, подкасты, видео, пользователей</value></data>
+  <data name="SessionHint" xml:space="preserve"><value>Токен нужен при запуске, затем он скрыт, пока вы сами не решите его заменить.</value></data>
+  <data name="SessionSectionTitle" xml:space="preserve"><value>Сессия</value></data>
+  <data name="SetToken" xml:space="preserve"><value>Установить токен</value></data>
+  <data name="StatusAddedQueue" xml:space="preserve"><value>Элементы добавлены в очередь загрузки.</value></data>
+  <data name="StatusChooseSavedToken" xml:space="preserve"><value>Выберите: использовать сохраненный токен или заменить его.</value></data>
+  <data name="StatusConnectedAs" xml:space="preserve"><value>Подключено как {0}.</value></data>
+  <data name="StatusConnectFirst" xml:space="preserve"><value>Сначала подключитесь с помощью токена.</value></data>
+  <data name="StatusDownloadFailed" xml:space="preserve"><value>Не удалось скачать {0}.</value></data>
+  <data name="StatusDownloaded" xml:space="preserve"><value>Скачано: {0}.</value></data>
+  <data name="StatusEnterToken" xml:space="preserve"><value>Введите токен Яндекса, чтобы начать.</value></data>
+  <data name="StatusLoadedBrowseOnly" xml:space="preserve"><value>Этот результат доступен только для просмотра.</value></data>
+  <data name="StatusLoadedDetails" xml:space="preserve"><value>Загружены детали для {0}.</value></data>
+  <data name="StatusNoResults" xml:space="preserve"><value>Результаты для категории "{0}" не найдены.</value></data>
+  <data name="StatusNotConnected" xml:space="preserve"><value>Нет подключения</value></data>
+  <data name="StatusResultsLoaded" xml:space="preserve"><value>Загружено результатов: {0}.</value></data>
+  <data name="StatusSearchPrompt" xml:space="preserve"><value>Введите что-нибудь для поиска.</value></data>
+  <data name="TokenPromptBody" xml:space="preserve"><value>Приложению нужен токен перед поиском и скачиванием. Токен сохраняется локально в открытом виде, как вы и просили ранее.</value></data>
+  <data name="TokenPromptCancel" xml:space="preserve"><value>Отмена</value></data>
+  <data name="TokenPromptConfirm" xml:space="preserve"><value>Использовать токен</value></data>
+  <data name="TokenPromptEmptyError" xml:space="preserve"><value>Токен не может быть пустым.</value></data>
+  <data name="TokenPromptPlaceholder" xml:space="preserve"><value>Вставьте токен сюда</value></data>
+  <data name="TokenPromptTitle" xml:space="preserve"><value>Токен Яндекса</value></data>
+  <data name="TokenPromptWindowTitle" xml:space="preserve"><value>Введите токен Яндекса</value></data>
+  <data name="UnknownArtist" xml:space="preserve"><value>Неизвестный артист</value></data>
+  <data name="YandexAlbumDescription" xml:space="preserve"><value>{0} треков{1}</value></data>
+  <data name="YandexArtistFallback" xml:space="preserve"><value>Артист</value></data>
+  <data name="YandexArtistTracksCount" xml:space="preserve"><value>Треков в результате: {0}</value></data>
+  <data name="YandexBrowseOnly" xml:space="preserve"><value>Только просмотр</value></data>
+  <data name="YandexConnectFirst" xml:space="preserve"><value>Сначала подключитесь с помощью токена Яндекса.</value></data>
+  <data name="YandexFolderAlbums" xml:space="preserve"><value>Albums</value></data>
+  <data name="YandexFolderArtists" xml:space="preserve"><value>Artists</value></data>
+  <data name="YandexFolderPlaylist" xml:space="preserve"><value>Playlists</value></data>
+  <data name="YandexFolderPodcastEpisodes" xml:space="preserve"><value>Podcast Episodes</value></data>
+  <data name="YandexFolderTracks" xml:space="preserve"><value>Tracks</value></data>
+  <data name="YandexPlaylistFallback" xml:space="preserve"><value>Плейлист</value></data>
+  <data name="YandexPlaylistTrackCount" xml:space="preserve"><value>{0} треков</value></data>
+  <data name="YandexPodcastEpisode" xml:space="preserve"><value>Эпизод подкаста</value></data>
+  <data name="YandexTrack" xml:space="preserve"><value>Трек</value></data>
+  <data name="YandexTrackDetailMissing" xml:space="preserve"><value>API не вернул детали трека.</value></data>
+  <data name="YandexUserDescription" xml:space="preserve"><value>Пакет отдает результаты поиска пользователей без подробных полей.</value></data>
+  <data name="YandexUserDetailDescription" xml:space="preserve"><value>Текущий пакет отдает результаты пользователей без полей, которые можно превратить в скачиваемые треки.</value></data>
+  <data name="YandexUserResult" xml:space="preserve"><value>Результат пользователя</value></data>
+  <data name="YandexVideoDetailFallback" xml:space="preserve"><value>API возвращает только метаданные видео, без связи со скачиваемой аудиодорожкой.</value></data>
+  <data name="YandexPlaylistIdentifiersMissing" xml:space="preserve"><value>В результате поиска плейлиста не хватает идентификаторов.</value></data>
+</root>

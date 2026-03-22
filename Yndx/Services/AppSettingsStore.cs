@@ -55,6 +55,9 @@ public sealed class AppSettingsStore
                 case "searchScope" when Enum.TryParse<SearchScope>(value, out var scope):
                     settings.SearchScope = scope;
                     break;
+                case "language" when Enum.TryParse<AppLanguage>(value, out var language):
+                    settings.Language = language;
+                    break;
             }
         }
 
@@ -67,7 +70,8 @@ public sealed class AppSettingsStore
         {
             $"token={Uri.EscapeDataString(settings.Token)}",
             $"downloadFolder={Uri.EscapeDataString(settings.DownloadFolder)}",
-            $"searchScope={Uri.EscapeDataString(settings.SearchScope.ToString())}"
+            $"searchScope={Uri.EscapeDataString(settings.SearchScope.ToString())}",
+            $"language={Uri.EscapeDataString(settings.Language?.ToString() ?? string.Empty)}"
         };
 
         return File.WriteAllLinesAsync(_settingsPath, lines, Encoding.UTF8);
