@@ -37,6 +37,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             if (SetField(ref _token, value))
             {
+                RaisePropertyChanged(nameof(HasSavedToken));
+                RaisePropertyChanged(nameof(TokenButtonText));
                 _ = PersistSettingsAsync();
             }
         }
@@ -92,7 +94,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             if (SetField(ref _isConnected, value))
             {
-                RaisePropertyChanged(nameof(ConnectButtonText));
                 RaisePropertyChanged(nameof(CanSearch));
             }
         }
@@ -110,7 +111,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
         private set => SetField(ref _accountDisplay, value);
     }
 
-    public string ConnectButtonText => IsConnected ? "Reconnect" : "Connect";
+    public bool HasSavedToken => !string.IsNullOrWhiteSpace(Token);
+
+    public string TokenButtonText => HasSavedToken ? "Change token" : "Set token";
 
     public bool NotBusy => !IsBusy;
 
@@ -182,21 +185,23 @@ public sealed class MainViewModel : INotifyPropertyChanged
         RaisePropertyChanged(nameof(Token));
         RaisePropertyChanged(nameof(DownloadFolder));
         RaisePropertyChanged(nameof(SelectedScope));
+        RaisePropertyChanged(nameof(HasSavedToken));
+        RaisePropertyChanged(nameof(TokenButtonText));
 
-        if (!string.IsNullOrWhiteSpace(Token))
-        {
-            StatusMessage = "Found a saved token. Connecting...";
-            await ConnectAsync();
-        }
+        StatusMessage = string.IsNullOrWhiteSpace(Token)
+            ? "Enter a Yandex token to start."
+            : "Choose whether to use the saved token or replace it.";
     }
 
-    public async Task ConnectAsync()
+    public async Task<bool> ConnectAsync()
     {
         if (string.IsNullOrWhiteSpace(Token))
         {
-            StatusMessage = "Paste a Yandex token first.";
-            return;
+            StatusMessage = "Enter a Yandex token to start.";
+            return false;
         }
+
+        var success = false;
 
         await RunBusyAsync(async () =>
         {
@@ -204,6 +209,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             IsConnected = true;
             AccountDisplay = string.IsNullOrWhiteSpace(account.DisplayName) ? account.Login : account.DisplayName;
             StatusMessage = $"Connected as {AccountDisplay}.";
+            success = true;
             await PersistSettingsAsync();
 
             if (!string.IsNullOrWhiteSpace(SearchText))
@@ -211,6 +217,21 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 await SearchAsync();
             }
         });
+
+        if (!success)
+        {
+            await _musicService.DisconnectAsync();
+            IsConnected = false;
+            AccountDisplay = "Not connected";
+        }
+
+        return success;
+    }
+
+    public async Task<bool> SaveTokenAndConnectAsync(string token)
+    {
+        Token = token.Trim();
+        return await ConnectAsync();
     }
 
     public async Task SearchAsync()

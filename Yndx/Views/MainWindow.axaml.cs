@@ -1,19 +1,20 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia;
 
 using Yndx.Models;
 using Yndx.ViewModels;
 
 namespace Yndx.Views;
 
-public sealed partial class MainWindow : Window
+public partial class MainWindow : Window
 {
     public MainWindow()
     {
         InitializeComponent();
         DataContext = new MainViewModel();
-        Opened += async (_, _) => await ViewModel.InitializeAsync();
+        Opened += OnOpened;
     }
 
     private MainViewModel ViewModel => (MainViewModel)DataContext!;
@@ -23,9 +24,15 @@ public sealed partial class MainWindow : Window
         AvaloniaXamlLoader.Load(this);
     }
 
-    private async void ConnectButton_OnClick(object? sender, RoutedEventArgs e)
+    private async void OnOpened(object? sender, EventArgs e)
     {
-        await ViewModel.ConnectAsync();
+        await ViewModel.InitializeAsync();
+        await PromptForTokenChoiceAsync();
+    }
+
+    private async void EditToken_OnClick(object? sender, RoutedEventArgs e)
+    {
+        await PromptForTokenAsync();
     }
 
     private async void SearchButton_OnClick(object? sender, RoutedEventArgs e)
@@ -60,5 +67,153 @@ public sealed partial class MainWindow : Window
         {
             await ViewModel.QueueTrackEntryAsync(track);
         }
+    }
+
+    private async Task PromptForTokenChoiceAsync()
+    {
+        if (ViewModel.HasSavedToken)
+        {
+            var choice = await ShowSavedTokenDialogAsync();
+            if (choice == true)
+            {
+                if (!await ViewModel.ConnectAsync())
+                {
+                    await PromptForTokenAsync();
+                }
+
+                return;
+            }
+
+            if (choice == false)
+            {
+                await PromptForTokenAsync();
+                return;
+            }
+
+            Close();
+            return;
+        }
+
+        await PromptForTokenAsync();
+    }
+
+    private async Task PromptForTokenAsync()
+    {
+        while (true)
+        {
+            var dialog = new TokenPromptWindow(ViewModel.Token);
+            var token = await dialog.ShowDialog<string?>(this);
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                Close();
+                return;
+            }
+
+            if (await ViewModel.SaveTokenAndConnectAsync(token))
+            {
+                return;
+            }
+        }
+    }
+
+    private async Task<bool?> ShowSavedTokenDialogAsync()
+    {
+        var dialog = new Window
+        {
+            Title = "Saved Token",
+            Width = 500,
+            Height = 220,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = Avalonia.Media.Brush.Parse("#F4EFE6")
+        };
+
+        bool? result = null;
+
+        var cancelButton = new Button
+        {
+            Content = "Cancel",
+            Background = Avalonia.Media.Brush.Parse("#A9A094"),
+            Foreground = Avalonia.Media.Brushes.White,
+            CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(18, 10)
+        };
+        cancelButton.Click += (_, _) =>
+        {
+            result = null;
+            dialog.Close();
+        };
+
+        var replaceButton = new Button
+        {
+            Content = "Change token",
+            Background = Avalonia.Media.Brush.Parse("#A64B2A"),
+            Foreground = Avalonia.Media.Brushes.White,
+            CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(18, 10)
+        };
+        replaceButton.Click += (_, _) =>
+        {
+            result = false;
+            dialog.Close();
+        };
+
+        var useSavedButton = new Button
+        {
+            Content = "Use saved token",
+            Background = Avalonia.Media.Brush.Parse("#0F766E"),
+            Foreground = Avalonia.Media.Brushes.White,
+            CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(18, 10)
+        };
+        useSavedButton.Click += (_, _) =>
+        {
+            result = true;
+            dialog.Close();
+        };
+
+        dialog.Content = new Grid
+        {
+            Margin = new Thickness(24),
+            RowDefinitions = new RowDefinitions("Auto,Auto,*"),
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = "Use saved token?",
+                    FontSize = 28,
+                    FontWeight = Avalonia.Media.FontWeight.Bold,
+                    Foreground = Avalonia.Media.Brush.Parse("#14383B")
+                },
+                new TextBlock
+                {
+                    Text = "A saved token was found. You can use it without showing the token value, replace it with a new one, or cancel.",
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                    Foreground = Avalonia.Media.Brush.Parse("#5C6667"),
+                    Margin = new Thickness(0, 14, 0, 0)
+                },
+                new StackPanel
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    Spacing = 12,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
+                    Children =
+                    {
+                        cancelButton,
+                        replaceButton,
+                        useSavedButton
+                    }
+                }
+            }
+        };
+
+        Grid.SetRow(((Grid)dialog.Content).Children[0], 0);
+        Grid.SetRow(((Grid)dialog.Content).Children[1], 1);
+        Grid.SetRow(((Grid)dialog.Content).Children[2], 2);
+
+        await dialog.ShowDialog(this);
+        return result;
     }
 }

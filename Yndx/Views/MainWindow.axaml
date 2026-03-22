@@ -7,6 +7,7 @@
         x:Class="Yndx.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
         Title="Yndx Music Browser"
         Width="1440"
         Height="920"
@@ -83,23 +84,18 @@
         <StackPanel Spacing="12">
           <TextBlock Classes="section-title" Text="Session" />
           <TextBlock Classes="muted-text"
-                     Text="Token is saved in plain text because you asked for the simple version." />
+                     Text="A token is required at startup, then it stays hidden unless you choose to replace it." />
           <TextBlock FontSize="18"
                      FontWeight="SemiBold"
                      Foreground="#14383B"
                      Text="{Binding AccountDisplay}" />
-          <TextBox Text="{Binding Token}"
-                   Watermark="Paste Yandex token"
-                   AcceptsReturn="True"
-                   TextWrapping="Wrap"
-                   MinHeight="110" />
           <TextBox Text="{Binding DownloadFolder}"
                    Watermark="Download folder"
                    MinHeight="36" />
           <Button Classes="primary-button"
-                  Content="{Binding ConnectButtonText}"
+                  Content="{Binding TokenButtonText}"
                   IsEnabled="{Binding NotBusy}"
-                  Click="ConnectButton_OnClick" />
+                  Click="EditToken_OnClick" />
           <TextBlock Classes="body-text" Text="{Binding StatusMessage}" />
         </StackPanel>
       </Border>
