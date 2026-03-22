@@ -1,0 +1,252 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Yndx.ViewModels"
+        xmlns:models="using:Yndx.Models"
+        x:Class="Yndx.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        mc:Ignorable="d"
+        Title="Yndx Music Browser"
+        Width="1440"
+        Height="920"
+        MinWidth="1100"
+        MinHeight="760"
+        Background="#F4EFE6">
+  <Window.Styles>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="#FFFDFC" />
+      <Setter Property="BorderBrush" Value="#D9CEC0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="22" />
+      <Setter Property="Padding" Value="20" />
+    </Style>
+    <Style Selector="Border.soft-card">
+      <Setter Property="Background" Value="#F8F2EA" />
+      <Setter Property="CornerRadius" Value="18" />
+      <Setter Property="Padding" Value="14" />
+    </Style>
+    <Style Selector="Border.note-card">
+      <Setter Property="Background" Value="#E5DDD2" />
+      <Setter Property="CornerRadius" Value="18" />
+      <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style Selector="Button.primary-button">
+      <Setter Property="Background" Value="#0F766E" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="Height" Value="42" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.warm-button">
+      <Setter Property="Background" Value="#A64B2A" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="Height" Value="42" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.small-button">
+      <Setter Property="Height" Value="34" />
+      <Setter Property="Padding" Value="14,0" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="TextBlock.section-title">
+      <Setter Property="FontSize" Value="24" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#12383D" />
+    </Style>
+    <Style Selector="TextBlock.muted-text">
+      <Setter Property="Foreground" Value="#5B6D70" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.result-title">
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#1B2D32" />
+    </Style>
+    <Style Selector="TextBlock.subtle-text">
+      <Setter Property="Foreground" Value="#6A5F58" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.body-text">
+      <Setter Property="Foreground" Value="#5C6667" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+  </Window.Styles>
+
+  <Grid Margin="24" ColumnDefinitions="320,*">
+    <StackPanel Grid.Column="0" Spacing="16">
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="section-title" Text="Session" />
+          <TextBlock Classes="muted-text"
+                     Text="Token is saved in plain text because you asked for the simple version." />
+          <TextBlock FontSize="18"
+                     FontWeight="SemiBold"
+                     Foreground="#14383B"
+                     Text="{Binding AccountDisplay}" />
+          <TextBox Text="{Binding Token}"
+                   Watermark="Paste Yandex token"
+                   AcceptsReturn="True"
+                   TextWrapping="Wrap"
+                   MinHeight="110" />
+          <TextBox Text="{Binding DownloadFolder}"
+                   Watermark="Download folder"
+                   MinHeight="36" />
+          <Button Classes="primary-button"
+                  Content="{Binding ConnectButtonText}"
+                  IsEnabled="{Binding NotBusy}"
+                  Click="ConnectButton_OnClick" />
+          <TextBlock Classes="body-text" Text="{Binding StatusMessage}" />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="note-card">
+        <TextBlock Classes="body-text"
+                   Text="Users and videos are browse-only. Albums, playlists, artists, tracks, and podcast episodes resolve into downloadable tracks." />
+      </Border>
+    </StackPanel>
+
+    <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="22,0,0,0">
+      <Grid ColumnDefinitions="*,200,140">
+        <TextBox Grid.Column="0"
+                 Text="{Binding SearchText}"
+                 Watermark="Search tracks, albums, artists, playlists, podcasts, videos, users"
+                 MinHeight="42" />
+        <ComboBox Grid.Column="1"
+                  ItemsSource="{Binding SearchScopes}"
+                  SelectedItem="{Binding SelectedScope}"
+                  Width="190"
+                  Margin="12,0,0,0" />
+        <Button Grid.Column="2"
+                Classes="warm-button"
+                Content="Search"
+                IsEnabled="{Binding CanSearch}"
+                Margin="12,0,0,0"
+                Click="SearchButton_OnClick" />
+      </Grid>
+
+      <Grid Grid.Row="1" ColumnDefinitions="1.15*,0.95*" Margin="0,18,0,0">
+        <Grid Grid.Column="0" RowDefinitions="*,0.9*">
+          <Border Grid.Row="0" Classes="card">
+            <Grid RowDefinitions="Auto,*">
+              <StackPanel>
+                <TextBlock Classes="section-title" Text="Results" />
+                <TextBlock Classes="muted-text" Text="Search hits from the selected Yandex scope." />
+              </StackPanel>
+              <ListBox Grid.Row="1"
+                       Margin="0,12,0,0"
+                       ItemsSource="{Binding Results}"
+                       SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
+                       Background="Transparent"
+                       BorderThickness="0">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="models:SearchResultItem">
+                    <Border Classes="soft-card" Margin="0,0,0,10">
+                      <StackPanel Spacing="8">
+                        <TextBlock Classes="result-title" Text="{Binding Title}" />
+                        <TextBlock Classes="subtle-text" Text="{Binding Subtitle}" />
+                        <TextBlock Classes="body-text" Text="{Binding Description}" />
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                          <Button Classes="small-button"
+                                  Background="#184A54"
+                                  Content="Open"
+                                  Click="OpenResult_OnClick" />
+                          <Button Classes="small-button"
+                                  Background="{Binding ActionBrush}"
+                                  Content="{Binding ActionLabel}"
+                                  Click="DownloadResult_OnClick" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Grid>
+          </Border>
+
+          <Border Grid.Row="1" Classes="card" Margin="0,18,0,0">
+            <Grid RowDefinitions="Auto,*">
+              <StackPanel>
+                <TextBlock Classes="section-title" Text="Queue" />
+                <TextBlock Classes="muted-text" Text="Downloads run one after another to keep things predictable." />
+              </StackPanel>
+              <ItemsControl Grid.Row="1" Margin="0,12,0,0" ItemsSource="{Binding Queue}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="models:DownloadQueueItem">
+                    <Border Classes="soft-card" Margin="0,0,0,10">
+                      <StackPanel Spacing="4">
+                        <TextBlock Classes="result-title" Text="{Binding Title}" />
+                        <TextBlock Classes="subtle-text" Text="{Binding Subtitle}" />
+                        <TextBlock FontWeight="SemiBold" Foreground="{Binding StatusBrush}" Text="{Binding Status}" />
+                        <TextBlock Classes="body-text" Text="{Binding DisplayPath}" />
+                        <TextBlock Foreground="#B42318"
+                                   TextWrapping="Wrap"
+                                   IsVisible="{Binding HasError}"
+                                   Text="{Binding Error}" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Grid>
+          </Border>
+        </Grid>
+
+        <Border Grid.Column="1" Classes="card" Margin="18,0,0,0">
+          <Grid RowDefinitions="Auto,*">
+            <StackPanel>
+              <TextBlock Classes="section-title" Text="Details" />
+              <TextBlock Classes="muted-text" Text="Inspect a result before downloading it." />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" Margin="0,12,0,0">
+              <StackPanel Spacing="10">
+                <TextBlock FontSize="22"
+                           FontWeight="Bold"
+                           Foreground="#14383B"
+                           Text="{Binding DetailTitle}" />
+                <TextBlock Classes="subtle-text"
+                           FontWeight="SemiBold"
+                           Text="{Binding DetailSubtitle}" />
+                <TextBlock Classes="body-text" Text="{Binding DetailDescription}" />
+                <Button Classes="small-button"
+                        Background="#0F766E"
+                        Content="Download all"
+                        IsVisible="{Binding CanDownloadDetail}"
+                        Click="DownloadAll_OnClick" />
+                <TextBlock Classes="body-text"
+                           IsVisible="{Binding IsDetailEmpty}"
+                           Text="{Binding DetailEmptyMessage}" />
+                <ItemsControl ItemsSource="{Binding DetailTracks}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:TrackEntry">
+                      <Border Classes="soft-card" Margin="0,0,0,10">
+                        <Grid ColumnDefinitions="*,120">
+                          <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock Classes="result-title" Text="{Binding Title}" />
+                            <TextBlock Classes="subtle-text" Text="{Binding Subtitle}" />
+                            <TextBlock Classes="body-text" Text="{Binding Album}" />
+                          </StackPanel>
+                          <Button Grid.Column="1"
+                                  Classes="small-button"
+                                  Background="#A64B2A"
+                                  Content="Queue track"
+                                  Margin="12,0,0,0"
+                                  Click="QueueTrack_OnClick" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </ScrollViewer>
+          </Grid>
+        </Border>
+      </Grid>
+    </Grid>
+  </Grid>
+</Window>

@@ -12,5 +12,9 @@ public sealed class SearchResultItem
 
     public bool CanDownload { get; init; }
 
+    public string ActionLabel => CanDownload ? "Download" : "Browse";
+
+    public string ActionBrush => CanDownload ? "#A64B2A" : "#7B8471";
+
     public required object RawItem { get; init; }
 }

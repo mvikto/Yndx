@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 
 using Yandex.Music.Api.Models.Track;
@@ -12,7 +13,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
 {
     private readonly AppSettingsStore _settingsStore = new();
     private readonly YandexMusicService _musicService = new();
-    private readonly List<DownloadQueueItem> _queue = [];
+    private readonly ObservableCollection<DownloadQueueItem> _queue = [];
+    private readonly ObservableCollection<SearchResultItem> _results = [];
 
     private bool _queueRunning;
     private string _token = string.Empty;
@@ -23,7 +25,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private bool _isConnected;
     private string _statusMessage = "Paste a token to connect.";
     private string _accountDisplay = "Not connected";
-    private IReadOnlyList<SearchResultItem> _results = [];
+    private SearchResultItem? _selectedResult;
     private EntityDetail? _detail;
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -73,13 +75,27 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public bool IsBusy
     {
         get => _isBusy;
-        private set => SetField(ref _isBusy, value);
+        private set
+        {
+            if (SetField(ref _isBusy, value))
+            {
+                RaisePropertyChanged(nameof(NotBusy));
+                RaisePropertyChanged(nameof(CanSearch));
+            }
+        }
     }
 
     public bool IsConnected
     {
         get => _isConnected;
-        private set => SetField(ref _isConnected, value);
+        private set
+        {
+            if (SetField(ref _isConnected, value))
+            {
+                RaisePropertyChanged(nameof(ConnectButtonText));
+                RaisePropertyChanged(nameof(CanSearch));
+            }
+        }
     }
 
     public string StatusMessage
@@ -94,19 +110,65 @@ public sealed class MainViewModel : INotifyPropertyChanged
         private set => SetField(ref _accountDisplay, value);
     }
 
-    public IReadOnlyList<SearchResultItem> Results
+    public string ConnectButtonText => IsConnected ? "Reconnect" : "Connect";
+
+    public bool NotBusy => !IsBusy;
+
+    public bool CanSearch => NotBusy && IsConnected;
+
+    public ObservableCollection<SearchResultItem> Results => _results;
+
+    public SearchResultItem? SelectedResult
     {
-        get => _results;
-        private set => SetField(ref _results, value);
+        get => _selectedResult;
+        set
+        {
+            if (SetField(ref _selectedResult, value) && value is not null)
+            {
+                _ = SelectResultAsync(value);
+            }
+        }
     }
 
     public EntityDetail? Detail
     {
         get => _detail;
-        private set => SetField(ref _detail, value);
+        private set
+        {
+            if (SetField(ref _detail, value))
+            {
+                RaisePropertyChanged(nameof(DetailTracks));
+                RaisePropertyChanged(nameof(DetailTitle));
+                RaisePropertyChanged(nameof(DetailSubtitle));
+                RaisePropertyChanged(nameof(DetailDescription));
+                RaisePropertyChanged(nameof(CanDownloadDetail));
+                RaisePropertyChanged(nameof(IsDetailEmpty));
+                RaisePropertyChanged(nameof(DetailEmptyMessage));
+            }
+        }
     }
 
-    public IReadOnlyList<DownloadQueueItem> Queue => _queue;
+    public ObservableCollection<DownloadQueueItem> Queue => _queue;
+
+    public IEnumerable<SearchScope> SearchScopes => Enum.GetValues<SearchScope>();
+
+    public IReadOnlyList<TrackEntry> DetailTracks => Detail?.Tracks ?? [];
+
+    public string DetailTitle => Detail?.Title ?? "Pick a result to inspect tracks or browse-only details.";
+
+    public string DetailSubtitle => Detail?.Subtitle ?? string.Empty;
+
+    public string DetailDescription => Detail?.Description ?? string.Empty;
+
+    public bool CanDownloadDetail => Detail?.CanDownloadAll == true;
+
+    public bool IsDetailEmpty => Detail is null || Detail.Tracks.Count == 0;
+
+    public string DetailEmptyMessage => Detail is null
+        ? "Pick a result to inspect tracks or browse-only details."
+        : Detail.IsBrowseOnly
+            ? "This result can be browsed but not downloaded."
+            : "No tracks were returned.";
 
     public async Task InitializeAsync()
     {
@@ -143,6 +205,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
             AccountDisplay = string.IsNullOrWhiteSpace(account.DisplayName) ? account.Login : account.DisplayName;
             StatusMessage = $"Connected as {AccountDisplay}.";
             await PersistSettingsAsync();
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                await SearchAsync();
+            }
         });
     }
 
@@ -161,11 +228,19 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         await RunBusyAsync(async () =>
         {
-            Results = await _musicService.SearchAsync(SearchText.Trim(), SelectedScope);
+            var items = await _musicService.SearchAsync(SearchText.Trim(), SelectedScope);
+
+            _results.Clear();
+            foreach (var item in items)
+            {
+                _results.Add(item);
+            }
+
+            SelectedResult = null;
             Detail = null;
-            StatusMessage = Results.Count == 0
+            StatusMessage = _results.Count == 0
                 ? $"No {SelectedScope.ToString().ToLowerInvariant()} results found."
-                : $"Loaded {Results.Count} result(s).";
+                : $"Loaded {_results.Count} result(s).";
         });
     }
 
@@ -209,7 +284,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
             });
         }
 
-        RaisePropertyChanged(nameof(Queue));
         StatusMessage = "Added items to the download queue.";
 
         if (!_queueRunning)
@@ -234,6 +308,22 @@ public sealed class MainViewModel : INotifyPropertyChanged
         ], folderHint);
     }
 
+    public Task QueueTrackEntryAsync(TrackEntry track)
+    {
+        var folderHint = Detail?.FolderHint ?? "Tracks";
+        return QueueSingleTrackAsync(track.Track, folderHint);
+    }
+
+    public Task QueueCurrentDetailAsync()
+    {
+        if (Detail is null || !Detail.CanDownloadAll)
+        {
+            return Task.CompletedTask;
+        }
+
+        return QueueTracksAsync(Detail.Tracks, Detail.FolderHint);
+    }
+
     private async Task ProcessQueueAsync()
     {
         _queueRunning = true;
@@ -244,8 +334,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
             {
                 item.Status = "Downloading";
                 item.Error = string.Empty;
-                RaisePropertyChanged(nameof(Queue));
-
                 try
                 {
                     item.TargetPath = await _musicService.DownloadTrackAsync(item.Track, DownloadFolder, item.FolderHint);
@@ -259,7 +347,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
                     StatusMessage = $"Failed to download {item.Title}.";
                 }
 
-                RaisePropertyChanged(nameof(Queue));
             }
         }
         finally

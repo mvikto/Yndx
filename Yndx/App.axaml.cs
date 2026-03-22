@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Styling;
-using Avalonia.Themes.Fluent;
+using Avalonia.Markup.Xaml;
 
 using Yndx.Views;
 
@@ -11,8 +10,7 @@ public sealed class App : Application
 {
     public override void Initialize()
     {
-        Styles.Add(new FluentTheme());
-        RequestedThemeVariant = ThemeVariant.Light;
+        AvaloniaXamlLoader.Load(this);
     }
 
     public override void OnFrameworkInitializationCompleted()
