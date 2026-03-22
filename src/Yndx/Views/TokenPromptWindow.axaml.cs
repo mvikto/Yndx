@@ -16,7 +16,7 @@ public partial class TokenPromptWindow : Window
 
     public TokenPromptWindow(string? currentToken = null)
     {
-        AvaloniaXamlLoader.Load(this);
+        InitializeComponent();
         ApplyLocalization();
         _localization.PropertyChanged += OnLocalizationChanged;
         TokenTextBox.Text = currentToken ?? string.Empty;

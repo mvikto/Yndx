@@ -22,11 +22,6 @@ public partial class MainWindow : Window
 
     private MainViewModel ViewModel => (MainViewModel)DataContext!;
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-
     private async void OnOpened(object? sender, EventArgs e)
     {
         await ViewModel.InitializeAsync();
